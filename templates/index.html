@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script
+        src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8="
+        crossorigin="anonymous">
+    </script>
+    <style type="text/css">
+        body{
+            background-color: #DDD;
+        }
+        canvas{
+            background-color: white;
+        }
+    </style>
+    <script type="text/javascript">
+        function querySignal(){
+            $.ajax({
+                url: "/signal",
+                success: function(result) {
+                    console.log(result);
+                }
+            });
+        }
+        function renderSignal(){
+
+        }
+    </script>
+</head>
+<body>
+<canvas id="signal_canvas" width="1000px" height="200px"></canvas>
+<canvas id="psd_canvas"  width="200" height="200px"></canvas>
+<script type="text/javascript">
+    querySignal();
+</script>
+</body>
+</html>
