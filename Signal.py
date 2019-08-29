@@ -30,8 +30,9 @@ class Signal:
 		return self.samples
 
 	def getFFT(self):
-		f_domain = rfft(map(lambda x: x[1], self.samples))
-		return map(lambda i: (self.SAMPLE_RATE_HZ/2.0/i, absolute(f_domain[i])), range(0, len(f_domain)))
+		f_domain = rfft(list(map(lambda x: x['y'], self.samples)))
+		df = self.SAMPLE_RATE_HZ / float(len(self.samples))
+		return list(map(lambda i: {'frequency': df*i, 'amplitude': absolute(f_domain[i])}, range(0, len(f_domain))))
 
 	def getPowerSpectralDensity(self):
 		return self.getFFT()

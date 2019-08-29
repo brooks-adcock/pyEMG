@@ -26,7 +26,7 @@
     <script type="text/javascript">
         var data_buffer = 0;
         var run = true;
-        var signal_x, psd_x, signalLine, psdLine, signal_plot, psd_plot;
+        var signal_x, psd_x, psd_y, signalLine, psdLine, signal_plot, psd_plot;
         var refresh_rate = 1; //milliseconds
 
         function createSignalPlot() {
@@ -90,6 +90,7 @@
             let x = d3.scaleLinear().range([0, width]);
             let y = d3.scaleLinear().range([height, 0]);
             psd_x = x;
+            psd_y = y;
 
             // define the line
             psdLine = d3.line()
@@ -122,6 +123,7 @@
 
             // Add the Y Axis
             psd_plot.append("g")
+                    .attr("class", "y_axis")
                     .call(d3.axisLeft(y));
 
             psd_plot.append("path")
@@ -140,14 +142,16 @@
                       d.t2 = new Date(d.t*1000)
                   });
 
+
+
+                signal_x.domain(d3.extent(data, function(d) { return d.t2; }));
+                signal_plot.select(".x_axis")
+                    .call(d3.axisBottom(signal_x).tickFormat(d3.timeFormat("%I:%M:%S.%L")));
+
                 // Add the valueline path.
                 signal_plot.select("#signal")
                     .data([data])
                     .attr("d", signalLine);
-
-                signal_x.domain(d3.extent(data, function(d) { return d.t2; }));
-                d3.select(".x_axis")
-                    .call(d3.axisBottom(signal_x).tickFormat(d3.timeFormat("%I:%M:%S.%L")));
 
                 if(run) setTimeout(querySignal, refresh_rate);
                 run = true;
@@ -159,16 +163,23 @@
             d3.json("/psd").then(function(data) {
                 data_buffer = data;
 
+
+
+                psd_x.domain([0, d3.max(data, function(d) { return d.frequency; })]);
+                psd_plot.select(".x_axis")
+                    .call(d3.axisBottom(psd_x));
+
+                psd_y.domain([0, d3.max(data, function(d) { return d.amplitude; })]);
+                psd_plot.select(".y_axis")
+                    .call(d3.axisLeft(psd_y));
+
                 // Add the valueline path.
-                svg.select("#psd")
+                psd_plot.select("#psd")
                     .data([data])
-                    .attr("d", valueline);
+                    .attr("d", psdLine);
 
-                x.domain(d3.extent(data, function(d) { return d.t2; }));
-                d3.select(".x_axis")
-                    .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%I:%M:%S.%L")));
 
-                if(run) setTimeout(querySignal, refresh_rate);
+                if(run) setTimeout(queryPSD(), refresh_rate);
                 run = true;
             });
         }
@@ -183,14 +194,11 @@
         createSignalPlot();
         createPSDPlot();
 
-        querySignal()
-
-        //queryPSD();
+        querySignal();
+        queryPSD();
 
     </script>
 
-    <script type="text/javascript">
-        //querySignal();
-    </script>
+
 </body>
 </html>
