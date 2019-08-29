@@ -25,7 +25,7 @@
     </style>
     <script type="text/javascript">
         var data_buffer = 0;
-        var run = true;
+        var is_running = true;
         var signal_x, psd_x, psd_y, signalLine, psdLine, signal_plot, psd_plot;
         var refresh_rate = 1; //milliseconds
 
@@ -133,6 +133,12 @@
                     .attr("d", psdLine);
         }
 
+        function run(){
+            is_running=true;
+            querySignal();
+            queryPSD();
+        }
+        
         function querySignal(){
             d3.json("/signal").then(function(data) {
 
@@ -153,8 +159,7 @@
                     .data([data])
                     .attr("d", signalLine);
 
-                if(run) setTimeout(querySignal, refresh_rate);
-                run = true;
+                if(is_running) setTimeout(querySignal, refresh_rate);
             });
 
         }
@@ -179,8 +184,7 @@
                     .attr("d", psdLine);
 
 
-                if(run) setTimeout(queryPSD(), refresh_rate);
-                run = true;
+                if(is_running) setTimeout(queryPSD(), refresh_rate);
             });
         }
 
