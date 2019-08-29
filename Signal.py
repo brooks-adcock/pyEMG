@@ -34,7 +34,7 @@ class Signal:
 		return map(lambda i: (self.SAMPLE_RATE_HZ/2.0/i, absolute(f_domain[i])), range(0, len(f_domain)))
 
 	def getPowerSpectralDensity(self):
-		pass
+		return self.getFFT()
 
 	def start(self):
 		print("Starting Signal")

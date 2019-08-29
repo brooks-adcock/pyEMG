@@ -29,54 +29,6 @@
         var signal_x, psd_x, signalLine, psdLine, signal_plot, psd_plot;
         var refresh_rate = 1; //milliseconds
 
-        function queryPSD(){
-            d3.json("/psd").then(function(data) {
-                data_buffer = data;
-
-                // Add the valueline path.
-                svg.select("#psd")
-                    .data([data])
-                    .attr("d", valueline);
-
-                x.domain(d3.extent(data, function(d) { return d.t2; }));
-                d3.select(".x_axis")
-                    .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%I:%M:%S.%L")));
-
-                if(run) setTimeout(querySignal, refresh_rate);
-                run = true;
-            });
-        }
-
-        function querySignal(){
-            d3.json("/signal").then(function(data) {
-
-                data_buffer = data;
-
-                data.forEach(function(d) {
-                      d.t2 = new Date(d.t*1000)
-                  });
-
-                // Add the valueline path.
-                signal_plot.select("#signal")
-                    .data([data])
-                    .attr("d", signalLine);
-
-                signal_x.domain(d3.extent(data, function(d) { return d.t2; }));
-                d3.select(".x_axis")
-                    .call(d3.axisBottom(signal_x).tickFormat(d3.timeFormat("%I:%M:%S.%L")));
-
-                if(run) setTimeout(querySignal, refresh_rate);
-                run = true;
-            });
-
-        }
-
-    </script>
-</head>
-<body>
-
-    <script type="text/javascript">
-
         function createSignalPlot() {
             // set the dimensions and margins of the graph
             let margin = {top: 20, right: 20, bottom: 30, left: 50},
@@ -127,18 +79,12 @@
                     .attr("class", "line")
                     .attr("d", signalLine);
         }
-        createSignalPlot();
-        querySignal()
-
-    </script>
-
-    <script type="text/javascript">
 
         function createPSDPlot() {
             // set the dimensions and margins of the graph
             let margin = {top: 20, right: 20, bottom: 30, left: 50},
-                    width = 500 - margin.left - margin.right,
-                    height = 500 - margin.top - margin.bottom;
+                    width = 960 - margin.left - margin.right,
+                    height = 250 - margin.top - margin.bottom;
 
             // set the ranges
             let x = d3.scaleLinear().range([0, width]);
@@ -162,7 +108,7 @@
                     .attr("height", height + margin.top + margin.bottom)
                     .append("g")
                     .attr("transform",
-                            "translate(" + psd_margin.left + "," + psd_margin.top + ")");
+                            "translate(" + margin.left + "," + margin.top + ")");
 
             // Scale the range of the data
             x.domain([0, 60]);
@@ -179,15 +125,66 @@
                     .call(d3.axisLeft(y));
 
             psd_plot.append("path")
-                    .data([[{frequency: 0, amplitude: 0}, {frequency: 60, amplitude: 0}]])
+                    .data([[{frequency: 0, amplitude: 0.5}, {frequency: 60, amplitude: 0.5}]])
                     .attr("id", "psd")
                     .attr("class", "line")
                     .attr("d", psdLine);
+        }
 
+        function querySignal(){
+            d3.json("/signal").then(function(data) {
+
+                data_buffer = data;
+
+                data.forEach(function(d) {
+                      d.t2 = new Date(d.t*1000)
+                  });
+
+                // Add the valueline path.
+                signal_plot.select("#signal")
+                    .data([data])
+                    .attr("d", signalLine);
+
+                signal_x.domain(d3.extent(data, function(d) { return d.t2; }));
+                d3.select(".x_axis")
+                    .call(d3.axisBottom(signal_x).tickFormat(d3.timeFormat("%I:%M:%S.%L")));
+
+                if(run) setTimeout(querySignal, refresh_rate);
+                run = true;
+            });
 
         }
 
-        //createPSDPlot();
+        function queryPSD(){
+            d3.json("/psd").then(function(data) {
+                data_buffer = data;
+
+                // Add the valueline path.
+                svg.select("#psd")
+                    .data([data])
+                    .attr("d", valueline);
+
+                x.domain(d3.extent(data, function(d) { return d.t2; }));
+                d3.select(".x_axis")
+                    .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%I:%M:%S.%L")));
+
+                if(run) setTimeout(querySignal, refresh_rate);
+                run = true;
+            });
+        }
+
+    </script>
+</head>
+<body>
+
+    <script type="text/javascript">
+
+
+        createSignalPlot();
+        createPSDPlot();
+
+        querySignal()
+
         //queryPSD();
 
     </script>

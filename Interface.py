@@ -16,6 +16,10 @@ def index():
 def signal():
 	return jsonify(Signal.singleton.getTimeSeries())
 
+@app.route("/psd")
+def psd():
+	return jsonify(Signal.singleton.getPowerSpectralDensity())
+
 
 if __name__ == '__main__':
 	app.run(debug=True)
