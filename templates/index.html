@@ -49,6 +49,7 @@
 
         function querySignal(){
             d3.json("/signal").then(function(data) {
+
                 data_buffer = data;
 
                 data.forEach(function(d) {
@@ -60,9 +61,9 @@
                     .data([data])
                     .attr("d", signalLine);
 
-                psd_x.domain(d3.extent(data, function(d) { return d.t2; }));
+                signal_x.domain(d3.extent(data, function(d) { return d.t2; }));
                 d3.select(".x_axis")
-                    .call(d3.axisBottom(psd_x).tickFormat(d3.timeFormat("%I:%M:%S.%L")));
+                    .call(d3.axisBottom(signal_x).tickFormat(d3.timeFormat("%I:%M:%S.%L")));
 
                 if(run) setTimeout(querySignal, refresh_rate);
                 run = true;
@@ -86,9 +87,9 @@
             let x = d3.scaleTime().range([0, width]);
             let y = d3.scaleLinear().range([height, 0]);
             signal_x = x;
-            
+
             // define the line
-            var signalLine = d3.line()
+            signalLine = d3.line()
                     .x(function (d) {
                         return x(d.t2);
                     })
@@ -124,8 +125,9 @@
                     .data([[{t: 0, t2: new Date(0), y: 0}, {t: 3, t2: new Date(3), y: 0}]])
                     .attr("id", "signal")
                     .attr("class", "line")
-                    .attr("d", signal_line);
+                    .attr("d", signalLine);
         }
+        createSignalPlot();
         querySignal()
 
     </script>
@@ -141,9 +143,10 @@
             // set the ranges
             let x = d3.scaleLinear().range([0, width]);
             let y = d3.scaleLinear().range([height, 0]);
+            psd_x = x;
 
             // define the line
-            let valueline = d3.line()
+            psdLine = d3.line()
                     .x(function (d) {
                         return x(d.frequency);
                     })
@@ -154,7 +157,7 @@
             // append the svg obgect to the body of the page
             // appends a 'group' element to 'svg'
             // moves the 'group' element to the top left margin
-            let svg = d3.select("body").append("svg")
+            psd_plot = d3.select("body").append("svg")
                     .attr("width", width + margin.left + margin.right)
                     .attr("height", height + margin.top + margin.bottom)
                     .append("g")
@@ -166,26 +169,26 @@
             y.domain([0, 1]);
 
             // Add the X Axis
-            svg.append("g")
+            psd_plot.append("g")
                     .attr("class", "x_axis")
                     .attr("transform", "translate(0," + height + ")")
                     .call(d3.axisBottom(x));
 
             // Add the Y Axis
-            svg.append("g")
+            psd_plot.append("g")
                     .call(d3.axisLeft(y));
 
-            svg.append("path")
+            psd_plot.append("path")
                     .data([[{frequency: 0, amplitude: 0}, {frequency: 60, amplitude: 0}]])
                     .attr("id", "psd")
                     .attr("class", "line")
-                    .attr("d", valueline);
+                    .attr("d", psdLine);
 
 
         }
 
-        createPSDPlot();
-        queryPSD();
+        //createPSDPlot();
+        //queryPSD();
 
     </script>
 
