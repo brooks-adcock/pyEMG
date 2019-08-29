@@ -6,20 +6,24 @@ from numpy import absolute
 
 class Signal:
 
+	singleton = None
+
 	def __init__(self):
 		self.SAMPLE_RATE_HZ = 60.0 * 4.0
-		SECONDS_RETAINED = 5.0
-		N_SAMPLES = self.SAMPLE_RATE_HZ * SECONDS_RETAINED
+		self.SECONDS_RETAINED = 5.0
+		N_SAMPLES = self.SAMPLE_RATE_HZ * self.SECONDS_RETAINED
 
-		self.samples = [0] * int(N_SAMPLES)
+		self.samples = [{'t': 0, 'y': 0}] * int(N_SAMPLES)
 		self.is_running = False
 		self.thread = Timer(1.0/self.SAMPLE_RATE_HZ, self.handle_function)
+		Signal.singleton = self
 
 	def handle_function(self):
-		self.samples.pop(0)
+		while self.samples[-1]['t'] - self.samples[0]['t'] > self.SECONDS_RETAINED:
+			self.samples.pop(0)
 		self.samples.append(getSample())
 		if self.is_running:
-			self.thread = Timer(1.0, self.handle_function)
+			self.thread = Timer(1.0/self.SAMPLE_RATE_HZ, self.handle_function)
 			self.thread.start()
 
 	def getTimeSeries(self):
@@ -33,9 +37,13 @@ class Signal:
 		pass
 
 	def start(self):
-		self.is_running = True
-		self.thread.start()
+		print("Starting Signal")
+		if not self.is_running:
+			self.is_running = True
+			self.thread.start()
 
-	def cancel(self):
-		self.is_running = False
-		self.thread.cancel()
+	def stop(self):
+		print("Stopping Signal")
+		if self.is_running:
+			self.is_running = False
+			self.thread.cancel()
