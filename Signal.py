@@ -1,7 +1,8 @@
 from ADC import getSample
 from threading import Timer
 from numpy.fft import rfft
-from numpy import absolute
+from numpy import absolute, diff, average, std
+import math
 
 
 class Signal:
@@ -9,7 +10,7 @@ class Signal:
 	singleton = None
 
 	def __init__(self):
-		self.SAMPLE_RATE_HZ = 60.0 * 4.0
+		self.SAMPLE_RATE_HZ = 20.0
 		self.SECONDS_RETAINED = 5.0
 		N_SAMPLES = self.SAMPLE_RATE_HZ * self.SECONDS_RETAINED
 
@@ -30,12 +31,27 @@ class Signal:
 		return self.samples
 
 	def getFFT(self):
-		f_domain = rfft(list(map(lambda x: x['y'], self.samples)))
-		df = self.SAMPLE_RATE_HZ / float(len(self.samples))
-		return list(map(lambda i: {'frequency': df*i, 'amplitude': absolute(f_domain[i])}, range(0, len(f_domain))))
+		profile_obj = self.getProfile()
+		f_domain = rfft([x['y'] for x in self.samples])
+		df = profile_obj['average_sample_frequency'] / float(len(self.samples))
+		return [{'frequency': df*i, 'amplitude': absolute(f_domain[i])} for i in range(0, len(f_domain))]
 
 	def getPowerSpectralDensity(self):
-		return self.getFFT()
+		fft = self.getFFT()
+		power = [{"frequency": pair['frequency'], 'amplitude': pair['frequency']*pair['amplitude']} for pair in fft]
+		total_power = sum([pair['amplitude'] for pair in power])
+		psd = [{'frequency': pair['frequency'], 'amplitude': pair['amplitude']/total_power} for pair in power]
+		return psd
+
+	def getProfile(self):
+		dt = diff([sample['t'] for sample in self.samples])
+		f_avg = 1.0 / average(dt)
+		profile_obj = {
+			"target_sample_frequency": self.SAMPLE_RATE_HZ,
+			"average_sample_frequency": f_avg,
+			"stdev_sample_frequency": std(dt)*f_avg**2
+		}
+		return profile_obj
 
 	def start(self):
 		print("Starting Signal")
@@ -48,3 +64,9 @@ class Signal:
 		if self.is_running:
 			self.is_running = False
 			self.thread.cancel()
+
+	def test(self, frequency):
+		self.stop()
+		times = [x/self.SAMPLE_RATE_HZ for x in range(int(self.SAMPLE_RATE_HZ*self.SECONDS_RETAINED))]
+		self.samples = [{'t': t, 'y': math.sin(2*math.pi*frequency*t)} for t in times]
+		print(self.samples)

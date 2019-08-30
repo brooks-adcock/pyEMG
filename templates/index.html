@@ -27,7 +27,7 @@
         var data_buffer = 0;
         var is_running = true;
         var signal_x, psd_x, psd_y, signalLine, psdLine, signal_plot, psd_plot;
-        var refresh_rate = 1; //milliseconds
+        var refresh_rate = 100; //milliseconds
 
         function createSignalPlot() {
             // set the dimensions and margins of the graph
@@ -138,7 +138,7 @@
             querySignal();
             queryPSD();
         }
-        
+
         function querySignal(){
             d3.json("/signal").then(function(data) {
 
@@ -152,6 +152,7 @@
 
                 signal_x.domain(d3.extent(data, function(d) { return d.t2; }));
                 signal_plot.select(".x_axis")
+                        .transition().duration(refresh_rate)
                     .call(d3.axisBottom(signal_x).tickFormat(d3.timeFormat("%I:%M:%S.%L")));
 
                 // Add the valueline path.
@@ -162,6 +163,15 @@
                 if(is_running) setTimeout(querySignal, refresh_rate);
             });
 
+        }
+
+        function queryProfile(){
+            d3.json("/profile").then(function(data){
+                $("#profile_target").text(data['target_sample_frequency']);
+                $("#profile_average").text(data['average_sample_frequency']);
+                $("#profile_std").text(data['stdev_sample_frequency']);
+                if(is_running) setTimeout(queryProfile, 1000);
+            });
         }
 
         function queryPSD(){
@@ -184,7 +194,7 @@
                     .attr("d", psdLine);
 
 
-                if(is_running) setTimeout(queryPSD(), refresh_rate);
+                if(is_running) setTimeout(queryPSD, refresh_rate);
             });
         }
 
@@ -200,9 +210,22 @@
 
         querySignal();
         queryPSD();
+        queryProfile();
 
     </script>
-
+    <table>
+        <tr>
+            <td>Target Sample Frequency</td>
+            <td id="profile_target"></td>
+        </tr>
+        <tr>
+            <td>Average Sample Frequency</td>
+            <td id="profile_average"></td>
+        </tr><tr>
+            <td>STD Sample Frequency</td>
+            <td id="profile_std"></td>
+        </tr>
+    </table>
 
 </body>
 </html>

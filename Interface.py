@@ -5,7 +5,9 @@ from Signal import Signal
 app = Flask(__name__)
 
 signal = Signal()
+#signal.test(110)
 signal.start()
+
 
 @app.route('/')
 def index():
@@ -16,9 +18,15 @@ def index():
 def signal():
 	return jsonify(Signal.singleton.getTimeSeries())
 
+
 @app.route("/psd")
 def psd():
 	return jsonify(Signal.singleton.getPowerSpectralDensity())
+
+
+@app.route("/profile")
+def profile():
+	return jsonify(Signal.singleton.getProfile())
 
 
 if __name__ == '__main__':
