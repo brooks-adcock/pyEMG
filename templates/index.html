@@ -184,9 +184,12 @@
                 psd_plot.select(".x_axis")
                     .call(d3.axisBottom(psd_x));
 
-                psd_y.domain([0, d3.max(data, function(d) { return d.amplitude; })]);
+
+                //psd_y.domain([0, d3.max(data, function(d) { return d.amplitude; })]);
+                psd_y.domain([0, 50]);
                 psd_plot.select(".y_axis")
                     .call(d3.axisLeft(psd_y));
+
 
                 // Add the valueline path.
                 psd_plot.select("#psd")
