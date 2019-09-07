@@ -1,8 +1,9 @@
 from ADC import getSample
-from threading import Timer
+from threading import Thread
 from numpy.fft import rfft
 from numpy import absolute, diff, average, std
 import math
+import time
 
 
 class Signal:
@@ -16,16 +17,18 @@ class Signal:
 
 		self.samples = [{'t': 0, 'y': 0}] * int(N_SAMPLES)
 		self.is_running = False
-		self.thread = Timer(1.0/self.SAMPLE_RATE_HZ, self.handle_function)
+		self.thread = Thread(target=self.handle_function)
 		Signal.singleton = self
 
 	def handle_function(self):
-		while self.samples[-1]['t'] - self.samples[0]['t'] > self.SECONDS_RETAINED:
-			self.samples.pop(0)
-		self.samples.append(getSample())
-		if self.is_running:
-			self.thread = Timer(1.0/self.SAMPLE_RATE_HZ, self.handle_function)
-			self.thread.start()
+		while(True):
+			while self.samples[-1]['t'] - self.samples[0]['t'] > self.SECONDS_RETAINED:
+				self.samples.pop(0)
+			self.samples.append(getSample())
+			time.sleep(1/self.SAMPLE_RATE_HZ)
+		if not self.is_running:
+			#todo kill thread
+			pass
 
 	def getTimeSeries(self):
 		return self.samples
