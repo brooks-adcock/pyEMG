@@ -10,7 +10,7 @@ class Signal:
 	singleton = None
 
 	def __init__(self):
-		self.SAMPLE_RATE_HZ = 70.0
+		self.SAMPLE_RATE_HZ = 120.0
 		self.SECONDS_RETAINED = 5.0
 		N_SAMPLES = self.SAMPLE_RATE_HZ * self.SECONDS_RETAINED
 
