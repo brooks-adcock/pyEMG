@@ -21,7 +21,8 @@ def signal():
 
 @app.route("/psd")
 def psd():
-	return jsonify(Signal.singleton.getPowerSpectralDensity())
+	return jsonify(Signal.singleton.getFFT())
+	#return jsonify(Signal.singleton.getPowerSpectralDensity())
 
 
 @app.route("/profile")
