@@ -4,6 +4,8 @@ from numpy.fft import rfft
 from numpy import absolute, diff, average, std
 import math
 import time
+import logging
+logging.basicConfig(filename="./log.log")
 
 
 class Signal:
@@ -22,9 +24,12 @@ class Signal:
 
 	def handle_function(self):
 		while(True):
+			t0 = time.time()
 			while self.samples[-1]['t'] - self.samples[0]['t'] > self.SECONDS_RETAINED:
 				self.samples.pop(0)
 			self.samples.append(getSample())
+			t1 = time.time()
+			logging.info("Sample {}".format(t1-t0))
 			time.sleep(1/self.SAMPLE_RATE_HZ)
 		if not self.is_running:
 			#todo kill thread
