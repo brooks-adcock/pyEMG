@@ -9,6 +9,25 @@
 #include <string.h>
 #include <time.h>
 
+const int N_SAMPLES = 1000;
+
+void writeSamples(int *index, long *samples, FILE* f_err){
+	FILE *f_data = fopen("/tmp/adc_data.log", "w");
+	if (f_data == NULL)
+	{
+		fprintf(f_err, "Failed to open data file");
+		exit(EXIT_FAILURE);
+	}  
+	
+	double t;
+	for(int i=0;i<N_SAMPLES; i++){
+		t = (double) (samples[i]) / CLOCKS_PER_SEC;
+		fprintf(f_data, "%f foo\n", t);
+	}
+	
+	fclose(f_data);
+}
+
 int main(void) {
         
 	/* Our process ID and Session ID */
@@ -35,13 +54,6 @@ int main(void) {
 		// I guess we can't log this failure anywhere
 		exit(EXIT_FAILURE);
 	}    
-
-	FILE *f_data = fopen("/tmp/adc_data.log", "w");
-	if (f_data == NULL)
-	{
-		fprintf(f_err, "Failed to open data file");
-		exit(EXIT_FAILURE);
-	}  
 			
 	/* Create a new SID for the child process */
 	sid = setsid();
@@ -68,18 +80,16 @@ int main(void) {
 	   /* Do some task here ... */
 	   //sleep(30); /* wait 30 seconds */
 	//}
-	//const int N_SAMPLES = 1000;
-	//int samples[N_SAMPLES];
-	//int write_index = 0;
+	long samples[N_SAMPLES];
+	int write_index = 0;
 	
-	double t;
-	for(int i=0; i < 1000; i++){
-		t = (double) (clock()) / CLOCKS_PER_SEC;
-		fprintf(f_data, "%f\n", t);
+	for(int i=0; i < N_SAMPLES; i++){
+		samples[i] = (long) clock();
 	}
 	
+	writeSamples(&write_index, samples, f_err);
+	
 	/* Close logs */
-	fclose(f_data);
 	fclose(f_err);
 	
 	exit(EXIT_SUCCESS);
